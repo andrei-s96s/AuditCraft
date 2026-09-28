@@ -5,62 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="AuditCraft — быстрый генератор правил auditd для Linux." />
     <title>AuditCraft — auditd rule builder</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="AuditCraft home"><span class="brand-mark">A</span>AuditCraft</a>
-      <span class="tag">auditd rule builder</span>
-      <a class="github" href="https://github.com/andrei-s96s/AuditCraft" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <a class="brand" href="#top" aria-label="AuditCraft home"><span class="brand-mark">A</span><span>Audit<span>Craft</span></span></a>
+      <span class="tag">// auditd rule builder</span>
+      <a class="github" href="https://github.com/andrei-s96s/AuditCraft" target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
     </header>
 
     <main id="top">
       <section class="hero">
-        <p class="eyebrow">Linux auditd, without the busywork</p>
-        <h1>Соберите правила,<br><em>которые нужны именно вам.</em></h1>
-        <p class="intro">Выберите готовые сценарии или добавьте свои пути. AuditCraft мгновенно подготовит чистый <code>.rules</code> файл для auditd.</p>
-        <div class="notice"><span>!</span><p>Перед применением проверьте пути и правила в тестовой среде. Избыточный аудит влияет на объём журналов и производительность.</p></div>
+        <p class="eyebrow"><span></span> AUDITD CONFIGURATION CONSOLE</p>
+        <h1>Правила под<br><em>ваш контроль.</em></h1>
+        <p class="intro">Выберите сценарии, добавьте важные пути и за секунду получите готовый файл <code>auditd.rules</code>.</p>
+        <div class="notice"><span>!</span><p><b>Внимание:</b> проверьте правила в тестовой среде перед применением в production. Избыточный аудит увеличивает объём логов.</p></div>
       </section>
 
       <section class="workspace" aria-label="Конструктор правил">
         <div class="builder">
-          <div class="section-heading"><div><p class="step">01 / PRESETS</p><h2>Что отслеживаем?</h2></div><button class="text-button" id="clear-all" type="button">Очистить всё</button></div>
+          <div class="section-heading"><div><p class="step">01 // PRESETS</p><h2>Что отслеживаем?</h2></div><button class="text-button" id="clear-all" type="button">[ очистить всё ]</button></div>
           <div class="preset-grid" id="preset-grid"></div>
 
-          <div class="section-heading paths-head"><div><p class="step">02 / CUSTOM PATHS</p><h2>Свои пути</h2></div></div>
+          <div class="section-heading paths-head"><div><p class="step">02 // CUSTOM PATHS</p><h2>Свои пути</h2></div></div>
           <form class="path-form" id="path-form">
-            <label class="sr-only" for="custom-path">Путь</label>
-            <input id="custom-path" name="path" type="text" placeholder="Например: /opt/my-app/config.yml" autocomplete="off" />
-            <fieldset class="permission-picker"><legend class="sr-only">События</legend>
-              <label><input type="checkbox" name="permission" value="r" /> чтение</label>
-              <label><input type="checkbox" name="permission" value="w" checked /> запись</label>
-              <label><input type="checkbox" name="permission" value="a" checked /> атрибуты</label>
-              <label><input type="checkbox" name="permission" value="x" /> запуск</label>
+            <div class="input-group path-input"><label for="custom-path">ПУТЬ</label><input id="custom-path" name="path" type="text" placeholder="/opt/my-app/config.yml" autocomplete="off" /></div>
+            <fieldset class="permission-picker"><legend>СОБЫТИЯ</legend><div>
+              <label title="Чтение"><input type="checkbox" name="permission" value="r" /><span>r</span></label>
+              <label title="Запись"><input type="checkbox" name="permission" value="w" checked /><span>w</span></label>
+              <label title="Атрибуты"><input type="checkbox" name="permission" value="a" checked /><span>a</span></label>
+              <label title="Запуск"><input type="checkbox" name="permission" value="x" /><span>x</span></label>
+            </div>
             </fieldset>
-            <input id="custom-key" name="key" type="text" placeholder="ключ (необязательно)" autocomplete="off" />
-            <button class="add-button" type="submit">Добавить <span>+</span></button>
+            <div class="input-group key-input"><label for="custom-key">КЛЮЧ</label><input id="custom-key" name="key" type="text" placeholder="my_app" autocomplete="off" /></div>
+            <button class="add-button" type="submit"><span>+</span> Добавить</button>
           </form>
           <div class="custom-list" id="custom-list" aria-live="polite"></div>
         </div>
 
         <aside class="output-card">
-          <div class="output-top"><div><p class="step">03 / YOUR RULES</p><h2>auditcraft.rules</h2></div><span class="count" id="rule-count">0 rules</span></div>
+          <div class="output-top"><div><p class="step">03 // YOUR RULES</p><h2>auditcraft.rules</h2></div><span class="count" id="rule-count">0 RULES</span></div>
           <pre id="rules-output"><code># Выберите пресеты слева,
 # чтобы начать сборку правил.</code></pre>
-          <div class="output-actions"><button class="copy-button" id="copy-button" type="button">Копировать</button><button class="download-button" id="download-button" type="button" disabled>Скачать .rules <span>↓</span></button></div>
+          <div class="output-actions"><button class="copy-button" id="copy-button" type="button">⧉ Копировать</button><button class="download-button" id="download-button" type="button" disabled>Скачать .rules <span>↓</span></button></div>
           <p class="hint">После скачивания: поместите файл в <code>/etc/audit/rules.d/</code>, затем выполните <code>augenrules --load</code>.</p>
         </aside>
       </section>
 
       <section class="how">
-        <p class="step">HOW IT WORKS</p>
+        <p class="step">// HOW IT WORKS</p>
         <div class="how-grid"><article><span>01</span><h3>Выберите</h3><p>Отметьте категории событий, которые важны для вашей системы.</p></article><article><span>02</span><h3>Проверьте</h3><p>Просмотрите сгенерированный файл и поправьте свои пути.</p></article><article><span>03</span><h3>Примените</h3><p>Скачайте правила, протестируйте и загрузите их в auditd.</p></article></div>
       </section>
     </main>
-    <footer><span>AuditCraft</span><span>Build useful audit trails.</span><span>© <span id="year"></span></span></footer>
+    <footer><span>Audit<span>Craft</span></span><span>Build useful audit trails.</span><span>© <span id="year"></span></span></footer>
     <script src="app.js"></script>
   </body>
 </html>

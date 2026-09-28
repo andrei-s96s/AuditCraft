@@ -1,70 +1,14 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AuditCraft — быстрый генератор правил auditd для Linux." />
-    <title>AuditCraft — auditd rule builder</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="topbar">
-      <a class="brand" href="#top" aria-label="AuditCraft home"><span class="brand-mark">A</span><span>Audit<span>Craft</span></span></a>
-      <span class="tag">// auditd rule builder</span>
-      <a class="github" href="https://github.com/andrei-s96s/AuditCraft" target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
-    </header>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="description" content="AuditCraft — auditd и rsyslog deployment builder"><title>AuditCraft — security audit console</title><link rel="stylesheet" href="styles.css"></head>
+<body><header class="topbar"><a class="brand" href="#top"><span class="brand-mark">A</span><span>Audit<span>Craft</span></span></a><span class="tag">// SECURITY AUDIT CONSOLE v2.0</span><nav><a href="#builder">Конструктор</a><a href="#deploy">Deploy</a><a href="#guide">Помощь</a></nav><a class="github" href="https://github.com/andrei-s96s/AuditCraft" target="_blank" rel="noreferrer">GitHub ↗</a></header>
+<main id="top"><section class="hero"><div><p class="eyebrow"><i></i> AUDITD + RSYSLOG DEPLOYMENT BUILDER</p><h1>Видеть важное.<br><em>Контролировать всё.</em></h1><p>Соберите правила auditd, доставку событий и команды для проверки — в одном готовом пакете.</p><div class="hero-actions"><a href="#builder" class="primary">Собрать конфигурацию <b>↓</b></a><button id="load-demo" class="secondary" type="button">Загрузить пример</button></div></div><div class="radar"><div class="radar-top"><span>AC // READY</span><span class="online">● SYSTEM ONLINE</span></div><div class="radar-core"><span></span><b>RULE<br>ENGINE</b></div><div class="radar-data"><div><small>PRESETS</small><strong id="hero-count">00</strong></div><div><small>OUTPUT</small><strong>.RULES</strong></div><div><small>PIPELINE</small><strong>READY</strong></div></div></div></section>
 
-    <main id="top">
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow"><span></span> AUDITD CONFIGURATION CONSOLE</p>
-          <h1>Правила под<br><em>ваш контроль.</em></h1>
-          <p class="intro">Выберите сценарии, добавьте важные пути и за секунду получите готовый файл <code>auditd.rules</code>.</p>
-          <div class="notice"><span>!</span><p><b>Внимание:</b> проверьте правила в тестовой среде перед применением в production. Избыточный аудит увеличивает объём логов.</p></div>
-        </div>
-        <div class="hero-console" aria-label="Статус конструктора">
-          <div class="console-top"><span>AC // STATUS</span><span class="online">● ONLINE</span></div>
-          <div class="console-core"><span class="core-ring"></span><span class="core-dot"></span><p>RULE<br>ENGINE</p></div>
-          <div class="console-data"><div><span>MODE</span><b>WATCH</b></div><div><span>FORMAT</span><b>.RULES</b></div><div><span>OUTPUT</span><b>READY</b></div></div>
-        </div>
-      </section>
+<section class="builder" id="builder"><div class="section-title"><div><p class="step">01 // SECURITY SCOPE</p><h2>Выберите, что важно защищать</h2></div><button id="clear-all" class="link-button" type="button">[ сбросить выбор ]</button></div><div class="profiles" id="profiles"><span>БЫСТРЫЕ ПРОФИЛИ</span></div><div class="preset-grid" id="preset-grid"></div></section>
 
-      <section class="workspace" aria-label="Конструктор правил">
-        <div class="builder">
-          <div class="section-heading"><div><p class="step">01 // PRESETS</p><h2>Что отслеживаем?</h2></div><button class="text-button" id="clear-all" type="button">[ очистить всё ]</button></div>
-          <div class="preset-grid" id="preset-grid"></div>
+<section class="custom-section"><div class="section-title"><div><p class="step">02 // CUSTOM WATCHES</p><h2>Добавьте свой путь</h2></div></div><form id="path-form" class="path-form"><div class="field path-field"><label for="custom-path">ПУТЬ</label><input id="custom-path" name="path" placeholder="/opt/my-app/config.yml" autocomplete="off"></div><fieldset class="permissions"><legend>СОБЫТИЯ</legend><div><label title="чтение"><input type="checkbox" name="permission" value="r"><span>r</span></label><label title="запись"><input type="checkbox" name="permission" value="w" checked><span>w</span></label><label title="атрибуты"><input type="checkbox" name="permission" value="a" checked><span>a</span></label><label title="запуск"><input type="checkbox" name="permission" value="x"><span>x</span></label></div></fieldset><div class="field"><label for="custom-key">КЛЮЧ СОБЫТИЯ</label><input id="custom-key" name="key" placeholder="my_app" autocomplete="off"></div><button class="primary add" type="submit">+ Добавить</button></form><div id="custom-list" class="custom-list"></div></section>
 
-          <div class="section-heading paths-head"><div><p class="step">02 // CUSTOM PATHS</p><h2>Свои пути</h2></div></div>
-          <form class="path-form" id="path-form">
-            <div class="input-group path-input"><label for="custom-path">ПУТЬ</label><input id="custom-path" name="path" type="text" placeholder="/opt/my-app/config.yml" autocomplete="off" /></div>
-            <fieldset class="permission-picker"><legend>СОБЫТИЯ</legend><div>
-              <label title="Чтение"><input type="checkbox" name="permission" value="r" /><span>r</span></label>
-              <label title="Запись"><input type="checkbox" name="permission" value="w" checked /><span>w</span></label>
-              <label title="Атрибуты"><input type="checkbox" name="permission" value="a" checked /><span>a</span></label>
-              <label title="Запуск"><input type="checkbox" name="permission" value="x" /><span>x</span></label>
-            </div>
-            </fieldset>
-            <div class="input-group key-input"><label for="custom-key">КЛЮЧ</label><input id="custom-key" name="key" type="text" placeholder="my_app" autocomplete="off" /></div>
-            <button class="add-button" type="submit"><span>+</span> Добавить</button>
-          </form>
-          <div class="custom-list" id="custom-list" aria-live="polite"></div>
-        </div>
+<section class="deploy" id="deploy"><div class="section-title"><div><p class="step">03 // DEPLOYMENT PIPELINE</p><h2>Куда и как доставлять события?</h2></div></div><div class="deploy-grid"><div class="deploy-card"><label for="distro">ЦЕЛЕВАЯ СИСТЕМА</label><select id="distro"><option value="debian">Ubuntu / Debian</option><option value="rhel">RHEL / AlmaLinux / Rocky</option><option value="fedora">Fedora</option></select><p>Команды установки подстраиваются под дистрибутив.</p></div><div class="deploy-card"><label for="destination">НАЗНАЧЕНИЕ ЛОГОВ</label><select id="destination"><option value="local">Только локальный auditd</option><option value="rsyslog">Удалённый rsyslog</option><option value="graylog">Graylog / Syslog receiver</option><option value="siem">SIEM (универсальный syslog)</option></select><p id="destination-help">Логи остаются в /var/log/audit/audit.log.</p></div><div class="deploy-card endpoint"><label for="log-host">LOG SERVER</label><input id="log-host" placeholder="logs.example.com" autocomplete="off"><div><span><label for="log-port">ПОРТ</label><input id="log-port" value="6514" inputmode="numeric"></span><span><label for="transport">ТРАНСПОРТ</label><select id="transport"><option value="tcp">TCP</option><option value="tls">TLS</option></select></span></div><p>Нужен только для удалённой доставки.</p></div></div><div class="warning" id="warnings" aria-live="polite"></div></section>
 
-        <aside class="output-card">
-          <div class="output-top"><div><p class="step">03 // YOUR RULES</p><h2>auditcraft.rules</h2></div><span class="count" id="rule-count">0 RULES</span></div>
-          <pre id="rules-output"><code># Выберите пресеты слева,
-# чтобы начать сборку правил.</code></pre>
-          <div class="output-actions"><button class="copy-button" id="copy-button" type="button">⧉ Копировать</button><button class="download-button" id="download-button" type="button" disabled>Скачать .rules <span>↓</span></button></div>
-          <p class="hint">После скачивания: поместите файл в <code>/etc/audit/rules.d/</code>, затем выполните <code>augenrules --load</code>.</p>
-        </aside>
-      </section>
+<section class="output" id="output"><div class="output-head"><div><p class="step">04 // DEPLOYMENT BUNDLE</p><h2>Готовый пакет конфигурации</h2></div><div class="output-tools"><button id="save-config" type="button">Сохранить JSON</button><button id="share-config" type="button">Скопировать ссылку</button></div></div><div class="tabs" role="tablist"><button class="tab active" data-tab="rules" type="button">auditcraft.rules</button><button class="tab" data-tab="rsyslog" type="button">60-auditcraft.conf</button><button class="tab" data-tab="install" type="button">install.sh</button><button class="tab" data-tab="verify" type="button">Проверка</button></div><div class="code-wrap"><pre id="code-output"><code></code></pre><div class="code-actions"><button id="copy-button" type="button">⧉ Копировать</button><button id="download-button" class="primary" type="button">Скачать файл ↓</button></div></div></section>
 
-      <section class="how">
-        <p class="step">// HOW IT WORKS</p>
-        <div class="how-grid"><article><span>01</span><h3>Выберите</h3><p>Отметьте категории событий, которые важны для вашей системы.</p></article><article><span>02</span><h3>Проверьте</h3><p>Просмотрите сгенерированный файл и поправьте свои пути.</p></article><article><span>03</span><h3>Примените</h3><p>Скачайте правила, протестируйте и загрузите их в auditd.</p></article></div>
-      </section>
-    </main>
-    <footer><span>Audit<span>Craft</span></span><span>Build useful audit trails.</span><span>© <span id="year"></span></span></footer>
-    <script src="app.js"></script>
-  </body>
-</html>
+<section class="guide" id="guide"><div class="guide-card"><p class="step">EXPLAINED RULES</p><h2>Что войдёт в аудит</h2><div id="explain-list"></div></div><div class="guide-card"><p class="step">RUNBOOK</p><h2>Безопасный запуск</h2><ol><li>Проверьте сгенерированные пути на тестовой машине.</li><li>Сначала выполните команды из вкладки «Проверка».</li><li>Следите за свободным местом в <code>/var/log/audit/</code>.</li><li>Для production используйте TLS или изолированную сеть для удалённого syslog.</li></ol></div><div class="guide-card"><p class="step">INTEGRATIONS</p><h2>Что дальше?</h2><p>Для Wazuh и Elastic лучше передавать структурированные события через специализированный агент. Для Graylog и общего SIEM используйте сгенерированный syslog‑pipeline.</p><a href="https://github.com/andrei-s96s/AuditCraft/issues" target="_blank" rel="noreferrer">Предложить интеграцию ↗</a></div></section></main><footer><span>Audit<span>Craft</span></span><span>Build useful audit trails.</span><span>© <span id="year"></span></span></footer><script src="app.js"></script></body></html>

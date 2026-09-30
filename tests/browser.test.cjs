@@ -21,6 +21,13 @@ test('Browser: profiles, validation, downloads, sharing, persistence and respons
     await context.route('https://fonts.googleapis.com/**',r=>r.fulfill({body:''}));
     const url=`http://127.0.0.1:${server.address().port}/`;
     await page.goto(url);assert.equal(await page.locator('.preset').count(),18);
+    assert.equal(await page.locator('.preset-icon svg').count(),18);
+    assert.equal(await page.locator('[role="tab"][aria-selected="true"]').count(),1);
+    await page.locator('#tab-rules').focus();await page.keyboard.press('ArrowDown');
+    assert.equal(await page.locator('#tab-rsyslog').getAttribute('aria-selected'),'true');
+    assert.equal(await page.locator('#file-panel').getAttribute('aria-labelledby'),'tab-rsyslog');
+    await page.keyboard.press('End');assert.equal(await page.locator('#tab-verify').getAttribute('aria-selected'),'true');
+    await page.keyboard.press('Home');assert.equal(await page.locator('#tab-rules').getAttribute('aria-selected'),'true');
     for(const id of await page.locator('.preset').evaluateAll(nodes=>nodes.map(n=>n.dataset.id))){
       await page.locator('#clear-all').click();await page.locator(`[data-id="${id}"]`).click();assert.match(await page.locator('#code-output').innerText(),/-w \//);
     }
@@ -54,6 +61,9 @@ test('Browser: profiles, validation, downloads, sharing, persistence and respons
     const jsonPromise=page.waitForEvent('download');await page.locator('#save-config').click();const json=JSON.parse(fs.readFileSync(await (await jsonPromise).path(),'utf8'));assert.equal(json.custom[0][2],'my_app');
     await page.locator('.custom-row button').click();assert.equal(await page.locator('.custom-row').count(),0);
     await page.locator('#load-demo').click();assert.match(await page.locator('#code-output').innerText(),/example_app/);
+    assert.equal(await page.locator('#profiles button[aria-pressed="true"]').count(),1);
+    assert.equal(await page.locator('#summary-destination').innerText(),'Rsyslog · TLS');
+    assert.equal(await page.locator('#editor-filename').innerText(),'auditdnexus.rules');
     await page.locator('#log-port').fill('65536');assert.equal(await page.locator('#download-button').isDisabled(),true);assert.match(await page.locator('#warnings').innerText(),/65535/);
     await page.locator('#log-port').fill('6514');assert.equal(await page.locator('#download-button').isDisabled(),false);
     await page.locator('#transport').selectOption('udp');assert.equal(await page.locator('#tls-settings').isVisible(),false);assert.match(await page.locator('#warnings').innerText(),/UDP/);

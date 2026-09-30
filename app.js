@@ -22,6 +22,42 @@ const profileMap={minimal:['auth','identity','logs'],server:['auth','identity','
 const profileNames={minimal:'Минимум',server:'Linux server',web:'Web server',database:'Database',container:'Docker host',incident:'Incident response',belarus130:'РБ · Linux baseline'};
 const $=s=>document.querySelector(s);const active=new Set();let custom=[];let currentTab='rules';
 const grid=$('#preset-grid'),profiles=$('#profiles'),code=$('#code-output code');
+const presetIconPaths={
+  auth:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/>',
+  identity:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m2-14a3 3 0 0 1 0 6m1 3a5 5 0 0 1 3 5"/>',
+  pam:'<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/>',
+  system:'<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 7.5h.1M7 17.5h.1m9-10h2m-2 10h2"/>',
+  schedule:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>',
+  network:'<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="2" y="16" width="6" height="5" rx="1"/><rect x="16" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M5 16v-4h14v4"/>',
+  packages:'<path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm0 9v10M3 8l9 4 9-4M7 5.8l9 4.4v4"/>',
+  certificates:'<rect x="4" y="3" width="16" height="15" rx="2"/><circle cx="12" cy="12" r="3"/><path d="m10 15-1 6 3-2 3 2-1-6M8 7h8"/>',
+  web:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.1m3 0h.1M7 13h4m-4 3h10"/>',
+  databases:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>',
+  containers:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 9v7m5-7v7m5-7v7M7 6V3h10v3"/>',
+  boot:'<path d="M12 3v9m-5-7a8 8 0 1 0 10 0"/>',
+  admin:'<path d="m4 6 5 6-5 6m8 0h8"/>',
+  usb:'<path d="M12 21V3m-3 3 3-3 3 3M12 16l-5-4V8m5 5 5-4V6"/><circle cx="7" cy="7" r="1"/><rect x="16" y="3" width="3" height="3"/><circle cx="12" cy="20" r="2"/>',
+  virtualization:'<rect x="3" y="3" width="12" height="12" rx="2"/><rect x="9" y="9" width="12" height="12" rx="2"/>',
+  backup:'<path d="M4 11a8 8 0 1 1 2 7m-2-7V5m0 6h6M12 7v5l3 2"/>',
+  logs:'<path d="M5 3h10l4 4v14H5V3Zm10 0v5h4M8 11h8m-8 4h8m-8 3h5"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>'
+};
+function presetIcon(id){return `<svg viewBox="0 0 24 24" aria-hidden="true">${presetIconPaths[id]}</svg>`}
+function renderWorkspace(){
+  const c=cfg(),d=tabData();
+  $('#summary-distro').textContent={debian:'Ubuntu / Debian',rhel:'RHEL / Alma / Rocky',fedora:'Fedora'}[c.distro];
+  $('#summary-destination').textContent=c.destination==='local'?'Локальные журналы':`${{rsyslog:'Rsyslog',graylog:'Graylog',siem:'SIEM'}[c.destination]} · ${c.transport.toUpperCase()}`;
+  $('#editor-filename').textContent=d.file;
+  $('#endpoint-status').textContent=c.destination==='local'?'Не используется':'Удалённая доставка';
+  document.querySelectorAll('#profiles button').forEach(button=>{
+    const id=button.dataset.profile,ids=profileMap[id],selected=ids.every(x=>active.has(x))&&active.size===ids.length+(id==='belarus130'?1:0)&&(id!=='belarus130'||active.has('belarus130'));
+    button.classList.toggle('picked',selected);button.setAttribute('aria-pressed',selected);
+  });
+  document.querySelectorAll('.tab').forEach(button=>{
+    const selected=button.dataset.tab===currentTab;button.classList.toggle('active',selected);button.setAttribute('aria-selected',selected);button.tabIndex=selected?0:-1;
+  });
+  $('#file-panel').setAttribute('aria-labelledby','tab-'+currentTab);
+}
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 const defaults={distro:'debian',destination:'local',host:'',port:'6514',transport:'tcp',ca:'/etc/rsyslog.d/ca.pem'};
 let stateNotice='';
@@ -90,11 +126,11 @@ function verifyText(){const r=rules(),key=r[0]?.[2]||'ssh_config';return `# Chec
 function tabData(){return {rules:{text:rulesText(),file:'auditdnexus.rules'},rsyslog:{text:rsyslogText(),file:'60-auditdnexus.conf'},install:{text:installText(),file:'install-auditdnexus.sh'},verify:{text:verifyText(),file:'verify-auditdnexus.sh'}}[currentTab]}
 function warningText(){const r=rules(),c=cfg(),w=[...configErrors(c)];if(stateNotice)w.push(stateNotice);if(!r.length)w.push('Выберите хотя бы один пресет или добавьте свой путь.');if(r.some(x=>x[1].includes('r')))w.push('Аудит чтения может быстро увеличить объём журналов — используйте его точечно.');if(c.destination!=='local'&&c.transport==='tls')w.push('Установите доверенный CA на сервер и проверьте, что сертификат коллектора содержит указанное имя.');if(active.has('belarus130'))w.push('РБ · Linux baseline: направьте события в центральный контур и храните их не менее 365 дней по применимым требованиям ОАЦ №66; состав источников и порядок реагирования утвердите у ответственного за ИБ.');if(c.transport==='tcp'&&c.destination!=='local')w.push('TCP не шифрует события. Для production предпочтительнее TLS или изолированная сеть.');if(c.transport==='udp'&&c.destination!=='local')w.push('UDP не гарантирует доставку и не шифрует данные. Используйте его только для некритичных событий в доверенной сети.');return w}
 function profileGuidance(){return active.has('belarus130')?'<b>ДОБАВЬТЕ СВОЙ ПУТЬ ДЛЯ ИСТОЧНИКОВ ВАШЕЙ СИСТЕМЫ</b><span>Базовые системные правила уже выбраны. Добавьте конфигурации и данные прикладных компонентов, которых нет в типовом Linux.</span><ul><li><code>/etc/&lt;app&gt;</code>, <code>/opt/&lt;app&gt;</code>, <code>/srv/&lt;app&gt;</code> — приложения и их конфигурации;</li><li><code>/etc/postgresql</code>, <code>/etc/mysql</code> — если используются СУБД;</li><li><code>/etc/nginx</code>, <code>/etc/apache2</code> — web-сервисы;</li><li>пути агентов EDR/антивируса, VPN, средств криптографической защиты и их журналов.</li></ul><small>Не добавляйте каталоги с высокой частотой записи без оценки нагрузки. События приложений, СУБД, сети и СЗИ также необходимо направить в центральный коллектор собственными агентами или syslog.</small>':''}
-function render(){const r=rules(),explained=[...active].map(id=>presets.find(x=>x[0]===id)).filter(Boolean);document.querySelectorAll('.preset').forEach(x=>{const on=active.has(x.dataset.id);x.classList.toggle('active',on);x.setAttribute('aria-pressed',on)});$('#hero-count').textContent=String(r.length+rbLinuxRules().filter(x=>x.startsWith('-')).length).padStart(2,'0');$('#custom-list').innerHTML=custom.map((x,i)=>`<div class="custom-row"><code>${esc(x[0])}</code><span>-${esc(x[1])}</span><small>${esc(x[2])}</small><button type="button" data-remove="${i}">×</button></div>`).join('');const g=$('#profile-guidance'),guide=profileGuidance();g.hidden=!guide;g.innerHTML=guide;const w=warningText();$('#warnings').innerHTML=w.length?`<b>ПРОВЕРЬТЕ ПЕРЕД DEPLOY</b>${w.map(x=>`<span>${esc(x)}</span>`).join('')}`:'<b class="ok">✓ CONFIGURATION LOOKS GOOD</b><span>Пути всё равно нужно проверить на целевой машине.</span>';const d=tabData();code.textContent=d.text;$('#download-button').textContent=`Скачать ${d.file} ↓`;$('#explain-list').innerHTML=explained.length?explained.map(p=>`<div><b>${p[2]}</b><span>${p[3]}</span></div>`).join(''):'<p class="empty">Выберите пресеты — здесь появится объяснение набора аудита.</p>';$('#tls-settings').hidden=cfg().destination==='local'||cfg().transport!=='tls';const invalid=configErrors().length>0;document.querySelectorAll('#copy-button,#download-button,#save-config,#share-config').forEach(x=>x.disabled=invalid);try{localStorage.setItem('auditdnexus-config',JSON.stringify(normalizeState(state())))}catch{if(!invalid){stateNotice='Браузер не разрешает сохранение настроек. Используйте JSON или ссылку.';$('#warnings').innerHTML+=`<span>${esc(stateNotice)}</span>`}}}
+function render(){const r=rules(),explained=[...active].map(id=>presets.find(x=>x[0]===id)).filter(Boolean);document.querySelectorAll('.preset').forEach(x=>{const on=active.has(x.dataset.id);x.classList.toggle('active',on);x.setAttribute('aria-pressed',on)});$('#hero-count').textContent=String(r.length+rbLinuxRules().filter(x=>x.startsWith('-')).length).padStart(2,'0');$('#custom-list').innerHTML=custom.map((x,i)=>`<div class="custom-row"><code>${esc(x[0])}</code><span>-${esc(x[1])}</span><small>${esc(x[2])}</small><button type="button" aria-label="Удалить правило для ${esc(x[0])}" data-remove="${i}">×</button></div>`).join('');const g=$('#profile-guidance'),guide=profileGuidance();g.hidden=!guide;g.innerHTML=guide;const w=warningText();$('#warnings').innerHTML=w.length?`<b>ПЕРЕД УСТАНОВКОЙ</b>${w.map(x=>`<span>${esc(x)}</span>`).join('')}`:'<b class="ok">✓ КОНФИГУРАЦИЯ ГОТОВА</b><span>Пути всё равно нужно проверить на целевой машине.</span>';const d=tabData();code.textContent=d.text;renderWorkspace();$('#download-button').textContent=`Скачать ${d.file} ↓`;$('#explain-list').innerHTML=explained.length?explained.map(p=>`<div><b>${p[2]}</b><span>${p[3]}</span></div>`).join(''):'<p class="empty">Выберите пресеты — здесь появится объяснение набора аудита.</p>';$('#tls-settings').hidden=cfg().destination==='local'||cfg().transport!=='tls';const invalid=configErrors().length>0;document.querySelectorAll('#copy-button,#download-button,#save-config,#share-config').forEach(x=>x.disabled=invalid);try{localStorage.setItem('auditdnexus-config',JSON.stringify(normalizeState(state())))}catch{if(!invalid){stateNotice='Браузер не разрешает сохранение настроек. Используйте JSON или ссылку.';$('#warnings').innerHTML+=`<span>${esc(stateNotice)}</span>`}}}
 function state(){return {active:[...active],custom,cfg:cfg()}}
 function applyState(s){const next=normalizeState(s);active.clear();next.active.forEach(x=>active.add(x));custom=next.custom;Object.entries(next.cfg).forEach(([k,v])=>$('#'+({host:'log-host',port:'log-port',ca:'tls-ca'}[k]||k)).value=v);stateNotice='';render()}
-presets.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='preset';b.dataset.id=p[0];b.innerHTML=`<span class="preset-title"><i>${p[1]}</i><strong>${p[2]}</strong><em>✓</em></span><small>${p[3]}</small>`;b.addEventListener('click',()=>{active.has(p[0])?active.delete(p[0]):active.add(p[0]);render()});grid.append(b)});
-Object.entries(profileNames).forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{active.clear();profileMap[id].forEach(x=>active.add(x));if(id==='belarus130'){active.add('belarus130');$('#destination').value='rsyslog';$('#transport').value='tls'}render();b.classList.add('picked');setTimeout(()=>b.classList.remove('picked'),500)});profiles.append(b)});
+presets.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='preset';b.dataset.id=p[0];b.innerHTML=`<span class="preset-title"><span class="preset-icon">${presetIcon(p[0])}</span><strong>${p[2]}</strong><em>✓</em></span><small>${p[3]}</small>`;b.addEventListener('click',()=>{active.has(p[0])?active.delete(p[0]):active.add(p[0]);render()});grid.append(b)});
+Object.entries(profileNames).forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.dataset.profile=id;b.textContent=name;b.addEventListener('click',()=>{active.clear();profileMap[id].forEach(x=>active.add(x));if(id==='belarus130'){active.add('belarus130');$('#destination').value='rsyslog';$('#transport').value='tls'}render()});profiles.append(b)});
 $('#path-form').addEventListener('submit',e=>{
   e.preventDefault();const d=new FormData(e.currentTarget),path=d.get('path').trim(),perms=d.getAll('permission').join(''),key=d.get('key').trim().replace(/\s+/g,'_')||'custom_path';
   const rule=[path,perms,key],error=watchError(rule);if(error)return alert(error);
@@ -102,7 +138,7 @@ $('#path-form').addEventListener('submit',e=>{
   if(rules().some(r=>r[0]===path&&r[1]===perms))return alert('Правило для этого пути и событий уже существует.');
   custom.push(rule);e.currentTarget.reset();e.currentTarget.querySelector('[value="w"]').checked=true;e.currentTarget.querySelector('[value="a"]').checked=true;render()
 });
-$('#custom-list').addEventListener('click',e=>{if(e.target.dataset.remove!==undefined){custom.splice(+e.target.dataset.remove,1);render()}});$('#clear-all').onclick=()=>{active.clear();custom=[];render()};document.querySelectorAll('#distro,#destination,#log-host,#log-port,#transport,#tls-ca').forEach(x=>x.addEventListener('input',render));document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{currentTab=x.dataset.tab;document.querySelectorAll('.tab').forEach(y=>y.classList.toggle('active',y===x));render()});
+$('#custom-list').addEventListener('click',e=>{if(e.target.dataset.remove!==undefined){custom.splice(+e.target.dataset.remove,1);render()}});$('#clear-all').onclick=()=>{active.clear();custom=[];render()};document.querySelectorAll('#distro,#destination,#log-host,#log-port,#transport,#tls-ca').forEach(x=>x.addEventListener('input',render));document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{currentTab=x.dataset.tab;render()});
 $('#copy-button').onclick=async()=>{const value=code.textContent;try{await navigator.clipboard.writeText(value)}catch{const t=document.createElement('textarea');t.value=value;document.body.append(t);t.select();document.execCommand('copy');t.remove()}$('#copy-button').textContent='✓ Скопировано';setTimeout(()=>$('#copy-button').textContent='⧉ Копировать',1300)};$('#download-button').onclick=()=>{const d=tabData(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d.text],{type:'text/plain'}));a.download=d.file;a.click();URL.revokeObjectURL(a.href)};
 $('#save-config').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state(),null,2)],{type:'application/json'}));a.download='auditdnexus-config.json';a.click();URL.revokeObjectURL(a.href)};$('#share-config').onclick=async()=>{const v=btoa(unescape(encodeURIComponent(JSON.stringify(state()))));if(v.length>200000)return alert('Конфигурация слишком большая для ссылки. Сохраните JSON.');const url=`${location.origin}${location.pathname}#config=${v}`;try{await navigator.clipboard.writeText(url);$('#share-config').textContent='✓ Ссылка скопирована'}catch{prompt('Скопируйте ссылку:',url)}setTimeout(()=>$('#share-config').textContent='Скопировать ссылку',1500)};$('#load-demo').onclick=()=>applyState({active:profileMap.web,custom:[['/opt/example-app','wa','example_app']],cfg:{distro:'debian',destination:'rsyslog',host:'logs.example.com',port:'6514',transport:'tls'}});
 try{
@@ -116,3 +152,13 @@ window.addEventListener('hashchange',()=>{
   try{if(hash[1].length>200000)throw Error('Слишком большая конфигурация.');applyState(JSON.parse(decodeURIComponent(escape(atob(hash[1])))))}
   catch{stateNotice='Не удалось загрузить конфигурацию из ссылки: данные повреждены или содержат недопустимые значения.';render()}
 });
+document.querySelectorAll('.tab').forEach((tab,index)=>tab.addEventListener('keydown',event=>{
+  const tabs=[...document.querySelectorAll('.tab')];let target=index;
+  if(event.key==='ArrowRight'||event.key==='ArrowDown')target=(index+1)%tabs.length;
+  else if(event.key==='ArrowLeft'||event.key==='ArrowUp')target=(index+tabs.length-1)%tabs.length;
+  else if(event.key==='Home')target=0;else if(event.key==='End')target=tabs.length-1;else return;
+  event.preventDefault();currentTab=tabs[target].dataset.tab;render();tabs[target].focus();
+}));
+document.querySelectorAll('.section-nav a').forEach(link=>link.addEventListener('click',()=>{
+  document.querySelectorAll('.section-nav a').forEach(other=>{const selected=other===link;other.classList.toggle('current',selected);if(selected)other.setAttribute('aria-current','location');else other.removeAttribute('aria-current')});
+}));

@@ -1,9 +1,103 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="description" content="AuditdNexus — auditd и rsyslog deployment builder"><title>AuditdNexus — security audit console</title><link rel="stylesheet" href="styles.css"></head>
-<body><header class="topbar"><a class="brand" href="#top"><span class="brand-mark">N</span><span>Auditd<span>Nexus</span></span></a><span class="tag">// SECURITY AUDIT CONSOLE v2.0</span><nav><button type="button" onclick="document.getElementById('builder').scrollIntoView({behavior:'smooth'})">Конструктор</button><button type="button" onclick="document.getElementById('deploy').scrollIntoView({behavior:'smooth'})">Deploy</button><button type="button" onclick="document.getElementById('guide').scrollIntoView({behavior:'smooth'})">Помощь</button></nav><a class="github" href="https://github.com/andrei-s96s/AuditdNexus" target="_blank" rel="noreferrer">GitHub ↗</a></header>
-<main id="top"><section class="hero"><div><p class="eyebrow"><i></i> AUDITD + RSYSLOG DEPLOYMENT BUILDER</p><h1>Видеть важное.<br><em>Контролировать всё.</em></h1><p>Соберите правила auditd, доставку событий и команды для проверки — в одном готовом пакете.</p><div class="hero-actions"><a href="#builder" class="primary">Собрать конфигурацию <b>↓</b></a><button id="load-demo" class="secondary" type="button">Загрузить пример</button></div></div><div class="radar"><div class="radar-top"><span>AN // READY</span><span class="online">● SYSTEM ONLINE</span></div><div class="radar-core"><span></span><b>RULE<br>ENGINE</b></div><div class="radar-data"><div><small>PRESETS</small><strong id="hero-count">00</strong></div><div><small>OUTPUT</small><strong>.RULES</strong></div><div><small>PIPELINE</small><strong>READY</strong></div></div></div></section>
-<section class="builder" id="builder"><div class="section-title"><div><p class="step">01 // SECURITY SCOPE</p><h2>Выберите, что важно защищать</h2></div><button id="clear-all" class="link-button" type="button">[ сбросить выбор ]</button></div><div class="profiles" id="profiles"><span>БЫСТРЫЕ ПРОФИЛИ</span></div><div class="preset-grid" id="preset-grid"></div></section>
-<section class="custom-section"><div class="section-title"><div><p class="step">02 // CUSTOM WATCHES</p><h2>Добавьте свой путь</h2></div></div><form id="path-form" class="path-form"><div class="field path-field"><label for="custom-path">ПУТЬ</label><input id="custom-path" name="path" placeholder="/opt/my-app/config.yml" autocomplete="off"></div><fieldset class="permissions"><legend>СОБЫТИЯ</legend><div><label title="чтение"><input type="checkbox" name="permission" value="r"><span>r</span></label><label title="запись"><input type="checkbox" name="permission" value="w" checked><span>w</span></label><label title="атрибуты"><input type="checkbox" name="permission" value="a" checked><span>a</span></label><label title="запуск"><input type="checkbox" name="permission" value="x"><span>x</span></label></div></fieldset><div class="field"><label for="custom-key">КЛЮЧ СОБЫТИЯ</label><input id="custom-key" name="key" placeholder="my_app" autocomplete="off"></div><button class="primary add" type="submit">+ Добавить</button></form><div id="profile-guidance" class="profile-guidance" hidden></div><div id="custom-list" class="custom-list"></div></section>
-<section class="deploy" id="deploy"><div class="section-title"><div><p class="step">03 // DEPLOYMENT PIPELINE</p><h2>Куда и как доставлять события?</h2></div></div><div class="deploy-grid"><div class="deploy-card"><label for="distro">ЦЕЛЕВАЯ СИСТЕМА</label><select id="distro"><option value="debian">Ubuntu / Debian</option><option value="rhel">RHEL / AlmaLinux / Rocky</option><option value="fedora">Fedora</option></select><p>Команды установки подстраиваются под дистрибутив.</p></div><div class="deploy-card"><label for="destination">НАЗНАЧЕНИЕ ЛОГОВ</label><select id="destination"><option value="local">Только локальный auditd</option><option value="rsyslog">Удалённый rsyslog</option><option value="graylog">Graylog / Syslog receiver</option><option value="siem">SIEM (универсальный syslog)</option></select><p>Логи остаются в /var/log/audit/audit.log.</p></div><div class="deploy-card endpoint"><label for="log-host">LOG SERVER</label><input id="log-host" placeholder="logs.example.com" autocomplete="off"><div><span><label for="log-port">ПОРТ</label><input id="log-port" value="6514" inputmode="numeric"></span><span><label for="transport">ТРАНСПОРТ</label><select id="transport"><option value="tcp">TCP</option><option value="tls">TLS</option><option value="udp">UDP</option></select></span></div><div id="tls-settings" hidden><span class="field"><label for="tls-ca">ДОВЕРЕННЫЙ CA НА СЕРВЕРЕ</label><input id="tls-ca" value="/etc/rsyslog.d/ca.pem" autocomplete="off"></span></div><p>Для TLS установите CA-файл и используйте имя из сертификата коллектора.</p></div></div><div class="warning" id="warnings" aria-live="polite"></div></section>
-<section class="output" id="output"><div class="output-head"><div><p class="step">04 // DEPLOYMENT BUNDLE</p><h2>Готовый пакет конфигурации</h2></div><div class="output-tools"><button id="save-config" type="button">Сохранить JSON</button><button id="share-config" type="button">Скопировать ссылку</button></div></div><div class="bundle-note"><b>ЗАЧЕМ НЕСКОЛЬКО ФАЙЛОВ?</b><span><code>auditdnexus.rules</code> — обязательные правила auditd.</span><span><code>60-auditdnexus.conf</code> — нужен только для отправки логов на другой сервер.</span><span><code>install.sh</code> — необязательная автоматизация установки.</span><span><code>Проверка</code> — команды, чтобы убедиться, что аудит работает.</span></div><div class="tabs" role="tablist"><button class="tab active" data-tab="rules" type="button">auditdnexus.rules</button><button class="tab" data-tab="rsyslog" type="button">60-auditdnexus.conf</button><button class="tab" data-tab="install" type="button">install.sh</button><button class="tab" data-tab="verify" type="button">Проверка</button></div><div class="code-wrap"><pre id="code-output"><code></code></pre><div class="code-actions"><button id="copy-button" type="button">⧉ Копировать</button><button id="download-button" class="primary" type="button">Скачать файл ↓</button></div></div></section>
-<section class="guide" id="guide"><div class="guide-card"><p class="step">EXPLAINED RULES</p><h2>Что войдёт в аудит</h2><div id="explain-list"></div></div><div class="guide-card"><p class="step">RUNBOOK</p><h2>Безопасный запуск</h2><ol><li>Проверьте сгенерированные пути на тестовой машине.</li><li>Сначала выполните команды из вкладки «Проверка».</li><li>Следите за свободным местом в <code>/var/log/audit/</code>.</li><li>Для production используйте TLS или изолированную сеть для удалённого syslog.</li></ol></div><div class="guide-card"><p class="step">INTEGRATIONS</p><h2>Что дальше?</h2><p>Для Wazuh и Elastic лучше передавать структурированные события через специализированный агент. Для Graylog и общего SIEM используйте сгенерированный syslog‑pipeline.</p><a href="https://github.com/andrei-s96s/AuditdNexus/issues" target="_blank" rel="noreferrer">Предложить интеграцию ↗</a></div></section></main><footer><span>Auditd<span>Nexus</span></span><span>Build useful audit trails.</span><span>© <span id="year"></span></span></footer><script src="app.js"></script></body></html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AuditdNexus — конструктор правил Linux auditd и доставки событий через rsyslog.">
+  <meta name="theme-color" content="#202722">
+  <title>AuditdNexus — конструктор политики аудита</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#builder">Перейти к конструктору</a>
+  <aside class="sidebar" aria-label="Навигация проекта">
+    <a class="brand" href="#top" aria-label="AuditdNexus — начало">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5 25V7h5l12 18h5V7h-5v12L14 7H5" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <span>Auditd<span>Nexus</span><small>LINUX AUDIT TOOLKIT</small></span>
+    </a>
+    <div class="workspace-label"><span class="workspace-avatar">A</span><span>Рабочая конфигурация<small>Локальный проект</small></span></div>
+    <p class="nav-label">КОНФИГУРАЦИЯ</p>
+    <nav class="section-nav" aria-label="Разделы конструктора">
+      <a href="#builder" class="current" aria-current="location"><span class="nav-number">01</span><span>Область аудита</span><span class="nav-arrow">↗</span></a>
+      <a href="#custom"><span class="nav-number">02</span><span>Свои пути</span><span class="nav-arrow">↗</span></a>
+      <a href="#deploy"><span class="nav-number">03</span><span>Доставка событий</span><span class="nav-arrow">↗</span></a>
+      <a href="#output"><span class="nav-number">04</span><span>Файлы и установка</span><span class="nav-arrow">↗</span></a>
+    </nav>
+    <a class="help-link" href="#guide"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3v.1"/></svg>Справка и запуск</a>
+    <div class="sidebar-bottom">
+      <div class="local-note"><span class="status-dot"></span><span>В вашем браузере<small>Без подключения к серверу</small></span></div>
+      <a class="github-link" href="https://github.com/andrei-s96s/AuditdNexus" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 19c-4 1-4-2-6-2m12 5v-4c0-1 .2-2-1-3 4-.4 7-2 7-6 0-2-.6-3-2-4 .2-1 .2-3-.3-4-1 0-3 1-4 2-2-.5-4-.5-6 0-1-1-3-2-4-2-.5 1-.5 3-.3 4-1.4 1-2 2-2 4 0 4 3 5.6 7 6-1 1-1 2-1 3v4"/></svg>Проект на GitHub <span>↗</span></a>
+    </div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div class="breadcrumb"><span>Workspace</span><span>/</span><strong>Конструктор аудита</strong></div><a class="topbar-help" href="#guide">Как это работает <span>↗</span></a></header>
+    <main id="top">
+      <section class="intro" aria-labelledby="page-title">
+        <div class="intro-copy"><p class="eyebrow"><span></span> AUDITD + RSYSLOG</p><h1 id="page-title">Политика аудита.<br><span>Под вашим контролем.</span></h1><p class="intro-description">Определите, какие изменения важны. Получите правила,<br class="desktop-break"> доставку событий и команды для развёртывания.</p></div>
+        <div class="intro-actions"><button id="load-demo" class="secondary" type="button"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m8 5 6 5-6 5V5Z"/></svg>Загрузить пример</button><span>Начните с готового web-профиля</span></div>
+      </section>
+      <div class="workbench">
+        <div class="configuration-column">
+          <section class="builder panel" id="builder" aria-labelledby="scope-title">
+            <div class="section-title"><div><p class="step">01 <span>ОБЛАСТЬ АУДИТА</span></p><h2 id="scope-title">Что будем отслеживать?</h2></div><button id="clear-all" class="link-button" type="button">Сбросить</button></div>
+            <p class="section-description">Выберите профиль или соберите свой набор источников.</p>
+            <div class="profiles" id="profiles" aria-label="Быстрые профили"><span>Быстрый старт</span></div>
+            <div class="source-heading"><span>Источники событий</span><span>18 доступно</span></div><div class="preset-grid" id="preset-grid"></div>
+            <div class="scope-footer"><span class="scope-dot"></span>Правила можно проверить до установки на сервер.</div>
+          </section>
+          <section class="custom-section panel" id="custom" aria-labelledby="custom-title">
+            <div class="section-title"><div><p class="step">02 <span>СВОИ ПУТИ</span></p><h2 id="custom-title">Добавьте то, что важно вам</h2></div><span class="section-badge">Необязательно</span></div>
+            <p class="section-description">Конфигурации приложений, ключи и другие файлы вашего сервера.</p>
+            <form id="path-form" class="path-form">
+              <div class="field path-field"><label for="custom-path">Абсолютный путь</label><input id="custom-path" name="path" placeholder="/opt/my-app/config.yml" autocomplete="off"></div>
+              <fieldset class="permissions"><legend>События</legend><div><label title="Чтение"><input type="checkbox" name="permission" value="r" aria-label="Чтение"><span>r</span></label><label title="Запись"><input type="checkbox" name="permission" value="w" checked aria-label="Запись"><span>w</span></label><label title="Атрибуты"><input type="checkbox" name="permission" value="a" checked aria-label="Атрибуты"><span>a</span></label><label title="Запуск"><input type="checkbox" name="permission" value="x" aria-label="Запуск"><span>x</span></label></div></fieldset>
+              <div class="field"><label for="custom-key">Ключ события</label><input id="custom-key" name="key" placeholder="my_app" autocomplete="off"></div><button class="primary add" type="submit">+ Добавить путь</button>
+            </form>
+            <p class="permissions-hint"><code>r</code> чтение <span>·</span> <code>w</code> запись <span>·</span> <code>a</code> атрибуты <span>·</span> <code>x</code> запуск</p>
+            <div id="profile-guidance" class="profile-guidance" hidden></div><div id="custom-list" class="custom-list"></div>
+          </section>
+          <section class="deploy panel" id="deploy" aria-labelledby="deploy-title">
+            <div class="section-title"><div><p class="step">03 <span>ДОСТАВКА СОБЫТИЙ</span></p><h2 id="deploy-title">От сервера до коллектора</h2></div></div>
+            <p class="section-description">Оставьте журналы локально или настройте отправку в свой контур.</p>
+            <div class="deploy-grid">
+              <div class="deploy-card"><label for="distro">Целевая система</label><select id="distro"><option value="debian">Ubuntu / Debian</option><option value="rhel">RHEL / AlmaLinux / Rocky</option><option value="fedora">Fedora</option></select><p>Команды установки подстроятся под систему.</p></div>
+              <div class="deploy-card"><label for="destination">Назначение журналов</label><select id="destination"><option value="local">Локальный auditd</option><option value="rsyslog">Удалённый rsyslog</option><option value="graylog">Graylog / Syslog receiver</option><option value="siem">SIEM / Syslog</option></select><p>Локальная копия остаётся в <code>/var/log/audit/</code>.</p></div>
+              <div class="deploy-card endpoint">
+                <div class="endpoint-heading"><span>Удалённый коллектор</span><small id="endpoint-status">Для удалённой доставки</small></div>
+                <div class="endpoint-fields"><div class="field host-field"><label for="log-host">Hostname или IP</label><input id="log-host" placeholder="logs.example.com" autocomplete="off"></div><div class="field"><label for="log-port">Порт</label><input id="log-port" value="6514" inputmode="numeric"></div><div class="field"><label for="transport">Транспорт</label><select id="transport"><option value="tcp">TCP</option><option value="tls">TLS</option><option value="udp">UDP</option></select></div></div>
+                <div id="tls-settings" hidden><div class="field"><label for="tls-ca">Путь к доверенному CA на сервере</label><input id="tls-ca" value="/etc/rsyslog.d/ca.pem" autocomplete="off"></div><p>Установите CA-файл. Имя коллектора должно совпадать с именем в сертификате.</p></div>
+              </div>
+            </div><div class="warning" id="warnings" aria-live="polite"></div>
+          </section>
+        </div>
+        <section class="output" id="output" aria-labelledby="output-title">
+          <div class="output-sticky">
+            <div class="output-head"><div><p class="step">04 <span>РЕЗУЛЬТАТ</span></p><h2 id="output-title">Ваша конфигурация</h2></div><span class="live-label"><i></i> Live preview</span></div>
+            <div class="output-summary"><div><strong id="hero-count">00</strong><span>правил аудита</span></div><div><strong id="summary-distro">Ubuntu / Debian</strong><span id="summary-destination">Локальные журналы</span></div></div>
+            <div class="file-heading"><span>ФАЙЛЫ КОНФИГУРАЦИИ</span><span>4</span></div>
+            <div class="tabs" role="tablist" aria-label="Файлы конфигурации">
+              <button id="tab-rules" class="tab active" role="tab" aria-selected="true" aria-controls="file-panel" data-tab="rules" type="button"><span class="file-icon">≡</span><span>auditdnexus.rules</span><small>RULES</small></button>
+              <button id="tab-rsyslog" class="tab" role="tab" aria-selected="false" aria-controls="file-panel" data-tab="rsyslog" type="button"><span class="file-icon">≡</span><span>60-auditdnexus.conf</span><small>CONF</small></button>
+              <button id="tab-install" class="tab" role="tab" aria-selected="false" aria-controls="file-panel" data-tab="install" type="button"><span class="file-icon">›_</span><span>install-auditdnexus.sh</span><small>SH</small></button>
+              <button id="tab-verify" class="tab" role="tab" aria-selected="false" aria-controls="file-panel" data-tab="verify" type="button"><span class="file-icon">›_</span><span>Проверка</span><small>SH</small></button>
+            </div>
+            <div class="code-wrap" id="file-panel" role="tabpanel" aria-labelledby="tab-rules" tabindex="0"><div class="editor-bar"><span id="editor-filename">auditdnexus.rules</span><span>UTF-8</span></div><pre id="code-output"><code></code></pre><div class="code-actions"><button id="copy-button" type="button">Копировать</button><button id="download-button" class="primary" type="button">Скачать файл ↓</button></div></div>
+            <div class="output-tools"><button id="save-config" type="button">Сохранить JSON</button><span>·</span><button id="share-config" type="button">Скопировать ссылку</button></div>
+            <details class="bundle-note"><summary>Как использовать эти файлы?</summary><p><code>auditdnexus.rules</code> — правила для auditd.</p><p><code>60-auditdnexus.conf</code> — доставка на удалённый сервер.</p><p><code>install-auditdnexus.sh</code> — автоматическая установка.</p><p><code>Проверка</code> — команды для проверки аудита.</p></details>
+          </div>
+        </section>
+      </div>
+      <section class="guide" id="guide" aria-label="Справка по развёртыванию">
+        <div class="guide-heading"><p class="eyebrow">ПЕРЕД РАЗВЁРТЫВАНИЕМ</p><h2>Хороший аудит начинается с проверки.</h2></div>
+        <div class="guide-grid">
+          <div class="guide-card"><span class="guide-number">01 / ОБЛАСТЬ</span><h3>Что войдёт в аудит</h3><div id="explain-list"></div></div>
+          <div class="guide-card"><span class="guide-number">02 / ЗАПУСК</span><h3>Проверьте на тестовой машине</h3><ol><li>Убедитесь, что выбранные пути существуют.</li><li>Выполните команды из вкладки «Проверка».</li><li>Следите за свободным местом в <code>/var/log/audit/</code>.</li><li>Для удалённой доставки используйте TLS или изолированную сеть.</li></ol></div>
+          <div class="guide-card"><span class="guide-number">03 / ИНТЕГРАЦИИ</span><h3>Подключите свой контур</h3><p>Для Wazuh и Elastic используйте специализированный агент. Для Graylog и других syslog-приёмников подойдёт сгенерированная конфигурация rsyslog.</p><a href="https://github.com/andrei-s96s/AuditdNexus/issues" target="_blank" rel="noreferrer">Предложить интеграцию <span>↗</span></a></div>
+        </div>
+      </section>
+    </main>
+    <footer><span>AuditdNexus <span class="footer-divider">/</span> Linux audit toolkit</span><span>Собрано в вашем браузере <span class="footer-divider">·</span> © <span id="year"></span></span></footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
